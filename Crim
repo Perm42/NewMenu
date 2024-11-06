@@ -132,82 +132,83 @@ function library.new(library_title, cfg_location)
         menu.on_load_cfg:Fire()
     end
 
-menu.open = true
-local ScreenGui = library:create("ScreenGui", {
-    ResetOnSpawn = false,
-    ZIndexBehavior = Enum.ZIndexBehavior.Global,
-    Name = "unknown",
-    IgnoreGuiInset = true,
-})
+    menu.open = true
+    local ScreenGui = library:create("ScreenGui", {
+        ResetOnSpawn = false,
+        ZIndexBehavior = Enum.ZIndexBehavior.Global,
+        Name = "unknown",
+        IgnoreGuiInset = true,
+    })
 
-if syn then
-    syn.protect_gui(ScreenGui)
-end
+	if syn then
+		syn.protect_gui(ScreenGui)
+	end
 
--- Hide the default mouse cursor
-local uis = game:GetService("UserInputService")
-local rs = game:GetService("RunService")  -- Ensure to use RunService for RenderStepped
-local ScreenGui = script.Parent  -- Assuming ScreenGui is parented to the script
-local menu = { open = false }  -- Menu state
+    local Cursor = library:create("ImageLabel", {
+        Name = "Cursor",
+        BackgroundTransparency = 1,
+        Size = UDim2.new(0, 17, 0, 17),
+        Image = "rbxassetid://7205257578",
+        ZIndex = 6969,
+    }, ScreenGui)
 
--- Use InputBegan to toggle the cursor visibility when menu opens/closes
-uis.InputBegan:Connect(function(key)
-    if key.KeyCode ~= Enum.KeyCode.Insert then return end
+    rs.RenderStepped:Connect(function()
+        Cursor.Position = UDim2.new(0, mouse.X, 0, mouse.Y + 36)
+    end)
 
-    -- Toggle the menu visibility
-    ScreenGui.Enabled = not ScreenGui.Enabled
-    menu.open = ScreenGui.Enabled
+	ScreenGui.Parent = game:GetService("CoreGui")
 
-    -- Toggle mouse cursor visibility based on menu state
-    if ScreenGui.Enabled then
-        uis.MouseIconEnabled = true  -- Show the default cursor when menu is open
-    else
-        uis.MouseIconEnabled = false  -- Hide the cursor when menu is closed
+    function menu.IsOpen()
+        return menu.open
     end
-end)
+    function menu.SetOpen(State)
+        ScreenGui.Enabled = state
+    end
 
-ScreenGui.Parent = game:GetService("CoreGui")
+    uis.InputBegan:Connect(function(key)
+        if key.KeyCode ~= Enum.KeyCode.Insert then return end
 
-function menu.IsOpen()
-    return menu.open
-end
+		ScreenGui.Enabled = not ScreenGui.Enabled
+        menu.open = ScreenGui.Enabled
 
-function menu.SetOpen(State)
-    ScreenGui.Enabled = State
-end
+        while ScreenGui.Enabled do
+            uis.MouseIconEnabled = true
+            rs.RenderStepped:Wait()
+        end
+	end)
 
-local ImageLabel = library:create("ImageButton", {
-    Name = "Main",
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    BackgroundColor3 = Color3.fromRGB(15, 15, 15),
-    BorderColor3 = Color3.fromRGB(78, 93, 234),
-    Position = UDim2.new(0.5, 0, 0.5, 0),
-    Size = UDim2.new(0, 700, 0, 500),
-    Image = "http://www.roblox.com/asset/?id=7300333488",
-    AutoButtonColor = false,
-    Modal = true,
-}, ScreenGui)
+    local ImageLabel = library:create("ImageButton", {
+        Name = "Main",
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundColor3 = Color3.fromRGB(15, 15, 15),
+        BorderColor3 = Color3.fromRGB(78, 93, 234),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 700, 0, 500),
+        Image = "http://www.roblox.com/asset/?id=7300333488",
+        AutoButtonColor = false,
+        Modal = true,
+    }, ScreenGui)
 
-function menu.GetPosition()
-    return ImageLabel.Position
-end
+    function menu.GetPosition()
+        return ImageLabel.Position
+    end
 
-library:set_draggable(ImageLabel)
+    library:set_draggable(ImageLabel)
 
-local Title = library:create("TextLabel", {
-    Name = "Title",
-    AnchorPoint = Vector2.new(0.5, 0),
-    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-    BackgroundTransparency = 1,
-    Position = UDim2.new(0.5, 0, 0, 0),
-    Size = UDim2.new(1, -22, 0, 30),
-    Font = Enum.Font.Ubuntu,
-    Text = library_title,
-    TextColor3 = Color3.fromRGB(255, 255, 255),
-    TextSize = 16,
-    TextXAlignment = Enum.TextXAlignment.Left,
-    RichText = true,
-}, ImageLabel)
+    local Title = library:create("TextLabel", {
+        Name = "Title",
+        AnchorPoint = Vector2.new(0.5, 0),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, 0, 0, 0),
+        Size = UDim2.new(1, -22, 0, 30),
+        Font = Enum.Font.Ubuntu,
+        Text = library_title,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 16,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        RichText = true,
+    }, ImageLabel)
 
     local TabButtons = library:create("Frame", {
         Name = "TabButtons",
