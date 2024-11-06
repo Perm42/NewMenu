@@ -144,27 +144,25 @@ if syn then
     syn.protect_gui(ScreenGui)
 end
 
--- Remove custom cursor code (no Cursor ImageLabel creation here)
-
 -- Hide the default mouse cursor
 local uis = game:GetService("UserInputService")
+local rs = game:GetService("RunService")  -- Ensure to use RunService for RenderStepped
+local ScreenGui = script.Parent  -- Assuming ScreenGui is parented to the script
+local menu = { open = false }  -- Menu state
 
 -- Use InputBegan to toggle the cursor visibility when menu opens/closes
 uis.InputBegan:Connect(function(key)
     if key.KeyCode ~= Enum.KeyCode.Insert then return end
 
+    -- Toggle the menu visibility
     ScreenGui.Enabled = not ScreenGui.Enabled
     menu.open = ScreenGui.Enabled
 
-    -- Toggle mouse cursor visibility
+    -- Toggle mouse cursor visibility based on menu state
     if ScreenGui.Enabled then
-        uis.MouseIconEnabled = true  -- Hide the default cursor
+        uis.MouseIconEnabled = true  -- Show the default cursor when menu is open
     else
-        uis.MouseIconEnabled = true   -- Show the default cursor when menu is closed
-    end
-
-    while ScreenGui.Enabled do
-        rs.RenderStepped:Wait()  -- Continue to wait while the menu is enabled
+        uis.MouseIconEnabled = false  -- Hide the cursor when menu is closed
     end
 end)
 
