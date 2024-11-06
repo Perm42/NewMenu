@@ -158,7 +158,7 @@ uis.InputBegan:Connect(function(key)
 
     -- Toggle mouse cursor visibility
     if ScreenGui.Enabled then
-        uis.MouseIconEnabled = false  -- Hide the default cursor
+        uis.MouseIconEnabled = true  -- Hide the default cursor
     else
         uis.MouseIconEnabled = false   -- Show the default cursor when menu is closed
     end
