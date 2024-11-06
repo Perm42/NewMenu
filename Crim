@@ -244,333 +244,214 @@ end)
         }
     );
 end
+-- beggining
+local is_first_tab = true
+local selected_tab
+local tab_num = 1
 
-    local is_first_tab = true
-    local selected_tab
-    local tab_num = 1
-    function menu.new_tab(tab_image)
-        local tab = {tab_num = tab_num}
-        menu.values[tab_num] = {}
-        tab_num = tab_num + 1
+function menu.new_tab(tab_image)
+    local tab = {tab_num = tab_num}
+    menu.values[tab_num] = {}
+    tab_num = tab_num + 1
 
-        local TabButton = library:create("TextButton", {
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+    local TabButton = library:create("TextButton", {
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundTransparency = 1,
+        Size = UDim2.new(0, 76, 0, 90),
+        Text = "",
+    }, TabButtons)
+
+    local TabImage = library:create("ImageLabel", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 32, 0, 32),
+        Image = tab_image,
+        ImageColor3 = Color3.fromRGB(100, 100, 100),  -- Default grey
+    }, TabButton)
+
+    local TabSections = Instance.new("Frame")
+    local TabFrames = Instance.new("Frame")
+
+    local Tab = library:create("Frame", {
+        Name = "Tab",
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 1, 0),
+        Visible = false,
+    }, Tabs)
+
+    local TabSections = library:create("Frame", {
+        Name = "TabSections",
+        Parent = Tab,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 0, 28),
+        ClipsDescendants = true,
+    }, Tab)
+
+    local UIListLayout = library:create("UIListLayout", {
+        FillDirection = Enum.FillDirection.Horizontal,
+        HorizontalAlignment = Enum.HorizontalAlignment.Center,
+    }, TabSections)
+
+    local TabFrames = library:create("Frame", {
+        Name = "TabFrames",
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 0, 0, 29),
+        Size = UDim2.new(1, 0, 0, 418),
+    }, Tab)
+
+    if is_first_tab then
+        is_first_tab = false
+        selected_tab = TabButton
+
+        -- Change from blue to orange
+        TabImage.ImageColor3 = Color3.fromRGB(255, 165, 0)  -- Orange color
+        Tab.Visible = true
+    end
+
+    TabButton.MouseButton1Down:Connect(function()
+        if selected_tab == TabButton then return end
+
+        for _, TButtons in pairs(TabButtons:GetChildren()) do
+            if not TButtons:IsA("TextButton") then continue end
+            library:tween(TButtons.ImageLabel, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(100, 100, 100)})  -- Default grey
+        end
+        for _, Tab in pairs(Tabs:GetChildren()) do
+            Tab.Visible = false
+        end
+        Tab.Visible = true
+        selected_tab = TabButton
+        library:tween(TabImage, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(255, 165, 0)})  -- Orange when selected
+    end)
+
+    TabButton.MouseEnter:Connect(function()
+        if selected_tab == TabButton then return end
+        library:tween(TabImage, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(255, 255, 255)})  -- White on hover
+    end)
+
+    TabButton.MouseLeave:Connect(function()
+        if selected_tab == TabButton then return end
+        library:tween(TabImage, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(100, 100, 100)})  -- Default grey
+    end)
+
+    local is_first_section = true
+    local num_sections = 0
+    local selected_section
+
+    function tab.new_section(section_name)
+        local section = {}
+
+        num_sections += 1
+        menu.values[tab.tab_num][section_name] = {}
+
+        local SectionButton = library:create("TextButton", {
+            Name = "SectionButton",
             BackgroundTransparency = 1,
-            Size = UDim2.new(0, 76, 0, 90),
-            Text = "",
-        }, TabButtons)
+            Size = UDim2.new(1 / num_sections, 0, 1, 0),
+            Font = Enum.Font.Ubuntu,
+            Text = section_name,
+            TextColor3 = Color3.fromRGB(100, 100, 100),  -- Default grey text
+            TextSize = 15,
+        }, TabSections)
 
-        local TabImage = library:create("ImageLabel", {
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            BackgroundTransparency = 1,
-            Position = UDim2.new(0.5, 0, 0.5, 0),
-            Size = UDim2.new(0, 32, 0, 32),
-            Image = tab_image,
-            ImageColor3 = Color3.fromRGB(100, 100, 100),
-        }, TabButton)
+        for _, SectionButtons in pairs(TabSections:GetChildren()) do
+            if SectionButtons:IsA("UIListLayout") then continue end
+            SectionButtons.Size = UDim2.new(1 / num_sections, 0, 1, 0)
+        end
 
-        local TabSections = Instance.new("Frame")
-        local TabFrames = Instance.new("Frame")
+        SectionButton.MouseEnter:Connect(function()
+            if selected_section == SectionButton then return end
+            library:tween(SectionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(255, 165, 0)})  -- Orange on hover
+        end)
 
-        local Tab = library:create("Frame", {
-            Name = "Tab",
+        SectionButton.MouseLeave:Connect(function()
+            if selected_section == SectionButton then return end
+            library:tween(SectionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(100, 100, 100)})  -- Default grey
+        end)
+
+        local SectionDecoration = library:create("Frame", {
+            Name = "SectionDecoration",
+            BackgroundColor3 = Color3.fromRGB(255, 165, 0),  -- Orange decoration
+            BorderSizePixel = 0,
+            Position = UDim2.new(0, 0, 0, 27),
+            Size = UDim2.new(1, 0, 0, 1),
+            Visible = false,
+        }, SectionButton)
+
+        local UIGradient = library:create("UIGradient", {
+            Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(32, 33, 38)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 165, 0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(32, 33, 38))},
+        }, SectionDecoration)
+
+        local SectionFrame = library:create("Frame", {
+            Name = "SectionFrame",
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
             Visible = false,
-        }, Tabs)
+        }, TabFrames)
 
-        local TabSections = library:create("Frame", {
-            Name = "TabSections",
-            Parent = Tab,
+        local Left = library:create("Frame", {
+            Name = "Left",
             BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, 28),
-            ClipsDescendants = true,
-        }, Tab)
+            Position = UDim2.new(0, 8, 0, 14),
+            Size = UDim2.new(0, 282, 0, 395),
+        }, SectionFrame)
 
         local UIListLayout = library:create("UIListLayout", {
-            FillDirection = Enum.FillDirection.Horizontal,
             HorizontalAlignment = Enum.HorizontalAlignment.Center,
-        }, TabSections)
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Padding = UDim.new(0, 12),
+        }, Left)
 
-        local TabFrames = library:create("Frame", {
-            Name = "TabFrames",
+        local Right = library:create("Frame", {
+            Name = "Right",
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 0, 0, 29),
-            Size = UDim2.new(1, 0, 0, 418),
-        }, Tab)
+            Position = UDim2.new(0, 298, 0, 14),
+            Size = UDim2.new(0, 282, 0, 395),
+        }, SectionFrame)
 
-        if is_first_tab then
-            is_first_tab = false
-            selected_tab = TabButton
+        local UIListLayout = library:create("UIListLayout", {
+            HorizontalAlignment = Enum.HorizontalAlignment.Center,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Padding = UDim.new(0, 12),
+        }, Right)
 
-            TabImage.ImageColor3 = Color3.fromRGB(84, 101, 255)
-            Tab.Visible = true
+        SectionButton.MouseButton1Down:Connect(function()
+            for _, SectionButtons in pairs(TabSections:GetChildren()) do
+                if SectionButtons:IsA("UIListLayout") then continue end
+                library:tween(SectionButtons, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(100, 100, 100)})  -- Default grey
+                SectionButtons.SectionDecoration.Visible = false
+            end
+            for _, TabFrame in pairs(TabFrames:GetChildren()) do
+                if not TabFrame:IsA("Frame") then continue end
+                TabFrame.Visible = false
+            end
+
+            selected_section = SectionButton
+            SectionFrame.Visible = true
+            library:tween(SectionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(255, 165, 0)})  -- Orange for selected section
+            SectionDecoration.Visible = true
+        end)
+
+        if is_first_section then
+            is_first_section = false
+            selected_section = SectionButton
+
+            SectionButton.TextColor3 = Color3.fromRGB(255, 165, 0)  -- Orange for selected section
+
+            SectionDecoration.Visible = true
+            SectionFrame.Visible = true
         end
 
-        TabButton.MouseButton1Down:Connect(function()
-            if selected_tab == TabButton then return end
+        function section.get_value()
+            return menu.values[tab.tab_num][section_name]
+        end
 
-            for _,TButtons in pairs (TabButtons:GetChildren()) do
-                if not TButtons:IsA("TextButton") then continue end
+        return section
+    end
 
-                library:tween(TButtons.ImageLabel, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(100, 100, 100)})
-            end
-            for _,Tab in pairs (Tabs:GetChildren()) do
-                Tab.Visible = false
-            end
-            Tab.Visible = true
-            selected_tab = TabButton
-            library:tween(TabImage, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(84, 101, 255)})
-        end)
-        TabButton.MouseEnter:Connect(function()
-            if selected_tab == TabButton then return end
-
-            library:tween(TabImage, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(255, 255, 255)})
-        end)
-        TabButton.MouseLeave:Connect(function()
-            if selected_tab == TabButton then return end
-
-            library:tween(TabImage, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(100, 100, 100)})
-        end)
-
-        local is_first_section = true
-        local num_sections = 0
-        local selected_section
-        function tab.new_section(section_name)
-            local section = {}
-
-            num_sections += 1
-
-            menu.values[tab.tab_num][section_name] = {}
-
-            local SectionButton = library:create("TextButton", {
-                Name = "SectionButton",
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1/num_sections, 0, 1, 0),
-                Font = Enum.Font.Ubuntu,
-                Text = section_name,
-                TextColor3 = Color3.fromRGB(100, 100, 100),
-                TextSize = 15,
-            }, TabSections)
-
-            for _,SectionButtons in pairs (TabSections:GetChildren()) do
-                if SectionButtons:IsA("UIListLayout") then continue end
-
-                SectionButtons.Size = UDim2.new(1/num_sections, 0, 1, 0)
-            end
-
-            SectionButton.MouseEnter:Connect(function()
-                if selected_section == SectionButton then return end
-
-                library:tween(SectionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(255, 255, 255)})
-            end)
-            SectionButton.MouseLeave:Connect(function()
-                if selected_section == SectionButton then return end
-
-                library:tween(SectionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(100, 100, 100)})
-            end)
-
-            local SectionDecoration = library:create("Frame", {
-                Name = "SectionDecoration",
-                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 0, 0, 27),
-                Size = UDim2.new(1, 0, 0, 1),
-                Visible = false,
-            }, SectionButton)
-
-            local UIGradient = library:create("UIGradient", {
-                Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(32, 33, 38)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(81, 97, 243)), ColorSequenceKeypoint.new(1, Color3.fromRGB(32, 33, 38))},
-            }, SectionDecoration)
-
-            local SectionFrame = library:create("Frame", {
-                Name = "SectionFrame",
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 1, 0),
-                Visible = false,
-            }, TabFrames)
-
-            local Left = library:create("Frame", {
-                Name = "Left",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 8, 0, 14),
-                Size = UDim2.new(0, 282, 0, 395),
-            }, SectionFrame)
-
-            local UIListLayout = library:create("UIListLayout", {
-                HorizontalAlignment = Enum.HorizontalAlignment.Center,
-                SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 12),
-            }, Left)
-
-            local Right = library:create("Frame", {
-                Name = "Right",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 298, 0, 14),
-                Size = UDim2.new(0, 282, 0, 395),
-            }, SectionFrame)
-
-            local UIListLayout = library:create("UIListLayout", {
-                HorizontalAlignment = Enum.HorizontalAlignment.Center,
-                SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 12),
-            }, Right)
-
-            SectionButton.MouseButton1Down:Connect(function()
-                for _,SectionButtons in pairs (TabSections:GetChildren()) do
-                    if SectionButtons:IsA("UIListLayout") then continue end
-                    library:tween(SectionButtons, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(100, 100, 100)})
-                    SectionButtons.SectionDecoration.Visible = false
-                end
-                for _,TabFrame in pairs (TabFrames:GetChildren()) do
-                    if not TabFrame:IsA("Frame") then continue end
-
-                    TabFrame.Visible = false
-                end
-
-                selected_section = SectionButton
-                SectionFrame.Visible = true
-                library:tween(SectionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(84, 101, 255)})
-                SectionDecoration.Visible = true
-            end)
-
-            if is_first_section then
-                is_first_section = false
-                selected_section = SectionButton
-
-                SectionButton.TextColor3 = Color3.fromRGB(84, 101, 255) 
-    
-                SectionDecoration.Visible = true
-                SectionFrame.Visible = true
-            end
-
-            function section.new_sector(sector_name, sector_side)
-                local sector = {}
-
-                local actual_side = sector_side == "Right" and Right or Left
-                menu.values[tab.tab_num][section_name][sector_name] = {}
-
-                local Border = library:create("Frame", {
-                    BackgroundColor3 = Color3.fromRGB(5, 5, 5),
-                    BorderColor3 = Color3.fromRGB(30, 30, 30),
-                    Size = UDim2.new(1, 0, 0, 20),
-                }, actual_side)
-
-                local Container = library:create("Frame", {
-                    BackgroundColor3 = Color3.fromRGB(10, 10, 10),
-                    BorderSizePixel = 0,
-                    Position = UDim2.new(0, 1, 0, 1),
-                    Size = UDim2.new(1, -2, 1, -2),
-                }, Border)
-
-                local UIListLayout = library:create("UIListLayout", {
-                    HorizontalAlignment = Enum.HorizontalAlignment.Center,
-                    SortOrder = Enum.SortOrder.LayoutOrder,
-                }, Container)
-
-                local UIPadding = library:create("UIPadding", {
-                    PaddingTop = UDim.new(0, 12),
-                }, Container)
-
-                local SectorTitle = library:create("TextLabel", {
-                    Name = "Title",
-                    AnchorPoint = Vector2.new(0.5, 0),
-                    BackgroundTransparency = 1,
-                    Position = UDim2.new(0.5, 0, 0, -8),
-                    Size = UDim2.new(1, 0, 0, 15),
-                    Font = Enum.Font.Ubuntu,
-                    Text = sector_name,
-                    TextColor3 = Color3.fromRGB(255, 255, 255),
-                    TextSize = 14,
-                }, Border)
-
-                function sector.create_line(thickness)
-                    thickness = thickness or 3
-                    Border.Size = Border.Size + UDim2.new(0, 0, 0, thickness * 3)
-
-                    local LineFrame = library:create("Frame", {
-                        Name = "LineFrame",
-                        BackgroundTransparency = 1,
-                        Position = UDim2.new(0, 0, 0, 0),
-                        Size = UDim2.new(0, 250, 0, thickness * 3),
-                    }, Container)
-
-                    local Line = library:create("Frame", {
-                        Name = "Line",
-                        BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-                        BorderColor3 = Color3.fromRGB(0, 0, 0),
-                        Position = UDim2.new(0.5, 0, 0.5, 0),
-                        AnchorPoint = Vector2.new(0.5, 0.5),
-                        Size = UDim2.new(1, 0, 0, thickness),
-                    }, LineFrame)
-                end
-
-                function sector.element(type, text, data, callback, c_flag)
-                    text, data, callback = text and text or type, data and data or {}, callback and callback or function() end
-
-                    local value = {}
-
-                    local flag = c_flag and text.." "..c_flag or text
-                    menu.values[tab.tab_num][section_name][sector_name][flag] = value
-
-                    local function do_callback()
-                        menu.values[tab.tab_num][section_name][sector_name][flag] = value
-                        callback(value)
-                    end
-
-                    local default = data.default and data.default
-
-                    local element = {}
-
-                    function element:get_value()
-                        return value
-                    end
-
-                    if type == "Toggle" then
-                        Border.Size = Border.Size + UDim2.new(0, 0, 0, 18)
-
-                        value = {Toggle = default and default.Toggle or false}
-
-                        local ToggleButton = library:create("TextButton", {
-                            Name = "Toggle",
-                            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                            BackgroundTransparency = 1,
-                            Position = UDim2.new(0, 0, 0, 0),
-                            Size = UDim2.new(1, 0, 0, 18),
-                            Text = "",
-                        }, Container)
-
-                        function element:set_visible(bool)
-                            if bool then
-                                if ToggleButton.Visible then return end
-                                Border.Size = Border.Size + UDim2.new(0, 0, 0, 18)
-                                ToggleButton.Visible = true
-                            else
-                                if not ToggleButton.Visible then return end
-                                Border.Size = Border.Size + UDim2.new(0, 0, 0, -18)
-                                ToggleButton.Visible = false
-                            end
-                        end
-
-                        local ToggleFrame = library:create("Frame", {
-                            AnchorPoint = Vector2.new(0, 0.5),
-                            BackgroundColor3 = Color3.fromRGB(30, 30, 30),
-                            BorderColor3 = Color3.fromRGB(0, 0, 0),
-                            Position = UDim2.new(0, 9, 0.5, 0),
-                            Size = UDim2.new(0, 9, 0, 9),
-                        }, ToggleButton)
-
-                        local ToggleText = library:create("TextLabel", {
-                            BackgroundTransparency = 1,
-                            Position = UDim2.new(0, 27, 0, 5),
-                            Size = UDim2.new(0, 200, 0, 9),
-                            Font = Enum.Font.Ubuntu,
-                            Text = text,
-                            TextColor3 = Color3.fromRGB(150, 150, 150),
-                            TextSize = 14,
-                            TextXAlignment = Enum.TextXAlignment.Left,
-                        }, ToggleButton)
-
+    return tab
+end
+-- end
                         local mouse_in = false
                         function element:set_value(new_value, cb)
                             value = new_value and new_value or value
